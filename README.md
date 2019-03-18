@@ -1,4 +1,14 @@
 # kubernetes-ansible
+### 本次安装的版本
+- Kubernetes v1.13.4
+- CNI v0.7.4
+- Etcd v3.3.12
+- Flannel v0.11.0 或者 Calico v3.4
+- Docker CE 18.06.03
+
+### 本次部署的网络信息
+- Cluster IP CIDR
+
 ### 节点信息
 | OS | IP  | Hostname | CPU | Memory |
 |-------|:-------:|:-------:|:-------:|:-------:|
@@ -31,3 +41,5 @@
 
 - docker官方的内核检查脚本建议(RHEL7/CentOS7: User namespaces disabled; add ‘user_namespace.enable=1’ to boot command line),使用下面命令开启  
   `grubby --args="user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)"`
+
+- 切记所有机器需要自行设定ntp
