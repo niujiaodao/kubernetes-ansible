@@ -44,3 +44,25 @@
   `grubby --args="user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)"`
 
 - 切记所有机器需要自行设定ntp
+
+- 在ansible下载Kubernetes二进制文件后分发到其他机器  
+  `export KUBE_VERSION=v1.13.4`
+  `curl https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/kubernetes-server-linux-amd64.tar.gz > kubernetes-server-linux-amd64.tar.gz`
+  `tar -zxvf kubernetes-server-linux-amd64.tar.gz --strip-components=3 -C /usr/local/bin kubernetes/server/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy}`
+  
+- 分发master相关组件二进制文件到其他master上
+  ```
+  for NODE in master01 master02 master03; do
+    echo "--- $NODE ---"
+    echo "scp /usr/local/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy} $NODE:/usr/local/bin/ "
+    scp /usr/local/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy} $NODE:/usr/local/bin/ 
+  done
+  ```
+  
+- 分发node的kubernetes二进制文件到其他node上
+  ```
+  for NODE in node01 node02; do
+    echo "--- $NODE ---"
+    scp /usr/local/bin/kube{let,-proxy} $NODE:/usr/local/bin/ 
+  done
+  ```
