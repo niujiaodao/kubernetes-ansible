@@ -37,7 +37,8 @@
 - Kubernetes v1.8+要求关闭系统Swap,若不关闭则需要修改kubelet设定参数( –fail-swap-on 设置为 false 来忽略 swap on),在所有机器使用以下指令关闭swap并注释掉/etc/fstab中swap的行  
   `swapoff -a && sysctl -w vm.swappiness=0`  
   `sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab`  
-- 安装工具  
+  
+- 由于需要使用overlay2驱动，需要升级centos7的内核至4以上  
 
 - docker官方的内核检查脚本建议(RHEL7/CentOS7: User namespaces disabled; add ‘user_namespace.enable=1’ to boot command line),使用下面命令开启  
   `grubby --args="user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)"`
