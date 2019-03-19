@@ -66,3 +66,22 @@
     scp /usr/local/bin/kube{let,-proxy} $NODE:/usr/local/bin/ 
   done
   ```
+  
+- 在ansible下载Kubernetes CNI 二进制文件并分发
+  ```
+  export CNI_URL="https://github.com/containernetworking/plugins/releases/download"
+  export CNI_VERSION=v0.7.4
+  mkdir -p /opt/cni/bin
+  wget  "${CNI_URL}/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" 
+  tar -zxf cni-plugins-amd64-${CNI_VERSION}.tgz -C /opt/cni/bin
+
+  # 分发cni文件
+  for NODE in master01 master02 master03 node01 node02; do
+    echo "--- $NODE ---"
+    ssh $NODE 'mkdir -p /opt/cni/bin'
+    scp /opt/cni/bin/* $NODE:/opt/cni/bin/
+  done
+  ```
+
+### 建立集群CA keys 与Certificates  
+在这个部分,将需要产生多个元件的Certificates,这包含Etcd、Kubernetes 元件等,并且每个集群都会有一个根数位凭证认证机构(Root Certificate Authority)被用在认证API Server 与Kubelet 端的凭证。
