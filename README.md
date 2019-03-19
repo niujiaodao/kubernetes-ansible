@@ -23,7 +23,7 @@
 - 高可用一般建议大于等于3台的奇数台,我使用3台master来做高可用
 
 
-### 事前准备
+## 事前准备
 - 所有机器彼此网络互通，并且ansible登入其他节点为无密码登录  
   `ssh-keygen -t rsa, 在ansible主机上生成公钥`  
   `ssh-copy-id, 将公钥复制到master01,master02,master03,node01,node02  
@@ -83,5 +83,21 @@
   done
   ```
 
-### 建立集群CA keys 与Certificates  
-在这个部分,将需要产生多个元件的Certificates,这包含Etcd、Kubernetes 元件等,并且每个集群都会有一个根数位凭证认证机构(Root Certificate Authority)被用在认证API Server 与Kubelet 端的凭证。
+## 建立集群CA keys 与Certificates  
+  在这个部分,将需要产生多个元件的Certificates,这包含Etcd、Kubernetes 元件等,并且每个集群都会有一个根数位凭证认证机构(Root Certificate Authority)被用在认证API Server 与Kubelet 端的凭证。
+- 这边要注意CA JSON档的CN(Common Name)与O(Organization)等内容是会影响Kubernetes元件认证的。
+  CN Common Name, apiserver 会从证书中提取该字段作为请求的用户名 (User Name)
+  O Organization, apiserver 会从证书中提取该字段作为请求用户所属的组 (Group)
+- CA (Certificate Authority) 是自签名的根证书，用来签名后续创建的其它证书。
+- 本文使用openssl创建所有证书。
+
+### 准备openssl 证书配置文件
+  注入ip信息  
+```
+mkdir -p /etc/kubernetes/pki/etcd
+sed -i "/IP.2/a IP.3 = $VIP" ~/k8s-manual-files/pki/openssl.cnf
+sed -ri '/IP.3/r '<( paste -d '' <(seq -f 'IP.%g = ' 4 $[${#AllNode[@]}+3]) <(xargs -n1<<<${AllNode[@]} | sort) ) ~/k8s-manual-files/pki/openssl.cnf
+sed -ri '$r '<( paste -d '' <(seq -f 'IP.%g = ' 2 $[${#MasterArray[@]}+1]) <(xargs -n1<<<${MasterArray[@]} | sort) ) ~/k8s-manual-files/pki/openssl.cnf
+cp ~/k8s-manual-files/pki/openssl.cnf /etc/kubernetes/pki/
+cd /etc/kubernetes/pki
+```
